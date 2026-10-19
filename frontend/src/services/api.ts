@@ -1,3 +1,4 @@
+
 import type {
   StockAnalysis,
   AnalyzeRequest,
@@ -8,14 +9,14 @@ import type {
   HealthResponse,
 } from '../types/stock';
 
-const API_BASE = '/api';
+const API_BASE = 'https://stock-trading-analyst-s83a.vercel.app/api';
 
 async function request<T>(
   endpoint: string,
   options?: RequestInit
 ): Promise<T> {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+  const timeoutId = setTimeout(() => controller.abort(), 30000);
 
   try {
     const res = await fetch(`${API_BASE}${endpoint}`, {
@@ -28,21 +29,25 @@ async function request<T>(
 
     if (!res.ok) {
       let errorMessage = `Request failed (${res.status})`;
+
       try {
         const errData = await res.json();
         errorMessage = errData.detail || errorMessage;
       } catch {
-        // use default message
+        // Use default error message
       }
+
       throw new Error(errorMessage);
     }
 
     return res.json() as Promise<T>;
   } catch (err) {
     clearTimeout(timeoutId);
+
     if (err instanceof Error && err.name === 'AbortError') {
       throw new Error('Request timed out. Please try again.');
     }
+
     throw err;
   }
 }
